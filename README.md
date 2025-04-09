@@ -13,7 +13,7 @@ This project is a simple, user-friendly Task Manager application built in Java u
 
 ### Possible Improvements
 1. Implement google calander support
-2. Api implemantation
+2. Api implementation
 3. Streaks: Check if a daily tasks is completed to continue streak.
 4. Notifications
 
