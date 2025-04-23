@@ -1,4 +1,3 @@
-# gui/gui_main.py
 from tkinter import *
 
 tasks = []
@@ -25,11 +24,13 @@ def cancel_task_input(task_name_entry, task_input_button):
 
 def update_task_display(task_list_label):
     # Clear the current displayed tasks
-    task_list_label.config(text="")
+    for widget in task_list_label.winfo_children():
+        widget.destroy()
 
-    # Display each task in the list
+    # Display each task with a colored background
     for task in tasks:
-        task_list_label.config(text=task_list_label.cget("text") + task + "\n")
+        task_label = Label(task_list_label, text=task, bg="lightblue", font=("Arial", 12), relief="solid", padx=10, pady=5)
+        task_label.pack(pady=5, fill="x")
 
 def run_gui():
     window = Tk()
@@ -47,9 +48,9 @@ def run_gui():
     # Button to show task input field
     task_input_button = Button(window, text="Add Task", command=lambda: show_task_input(task_name_entry, task_input_button, task_list_label))
 
-    # Task List Display
-    task_list_label = Label(window, text="", bg="lightgray")
-    task_list_label.pack(pady=10)
+    # Task List Display (this will contain task labels)
+    task_list_label = Frame(window, bg="lightgray")
+    task_list_label.pack(pady=10, fill="both", expand=True)
 
     # Bind the Enter key to add the task when pressed
     task_name_entry.bind('<Return>', lambda event: add_task(task_name_entry, task_list_label, task_input_button))
