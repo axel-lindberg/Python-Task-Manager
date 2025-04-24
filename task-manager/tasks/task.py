@@ -13,5 +13,4 @@ class Task:
         self.description = new_description
 
     def __str__(self):
-        status = "✔" if self.completed else "✘"
-        return f"[{status}] {self.description}"
+        return f"{self.description}"
