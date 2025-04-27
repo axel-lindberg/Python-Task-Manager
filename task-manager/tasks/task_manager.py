@@ -5,7 +5,9 @@ class TaskManager:
         self.tasks = []
 
     def add_task(self, description):
-        self.tasks.append(Task(description))
+        task = Task(description)
+        self.tasks.append(task)
+        return task
 
     def list_tasks(self):
         return [str(task) for task in self.tasks]
