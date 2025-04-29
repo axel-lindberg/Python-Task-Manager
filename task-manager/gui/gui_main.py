@@ -1,5 +1,8 @@
 from tkinter import *
+from tkcalendar import Calendar, DateEntry
+from datetime import datetime
 from tasks.task_manager import TaskManager
+from tasks.task_with_status import TaskWithStatus  # Ny fil du nämnde
 
 manager = TaskManager()
 
@@ -14,7 +17,6 @@ def _create_round_rectangle(self, x1, y1, x2, y2, radius=10, **kwargs):
         x2 - radius, y2,
         x1 + radius, y2,
         x1, y2,
-        x1, y2 - radius,
         x1, y1 + radius,
         x1, y1
     ]
@@ -22,20 +24,47 @@ def _create_round_rectangle(self, x1, y1, x2, y2, radius=10, **kwargs):
 
 Canvas.create_round_rectangle = _create_round_rectangle
 
-class TaskWithStatus:
-    def __init__(self, task):
-        self.task = task
-        self.completed = False
-
-def show_task_input(task_name_entry, task_add_button):
-    task_name_entry.pack(pady=100)
+def show_task_input(task_name_entry, task_list_canvas, task_add_button):
+    task_name_entry.pack()
     task_add_button.pack_forget()
 
-def add_task(task_name_entry, task_list_canvas, task_add_button, task_name_entry_ref):
+    def open_calendar_after_input(event=None):
+        open_calendar(task_name_entry, task_list_canvas, task_add_button, task_name_entry)
+
+    task_name_entry.bind("<Return>", open_calendar_after_input)
+    task_name_entry.bind("<Escape>", lambda e: cancel_task_input(task_name_entry, task_add_button))
+
+def open_calendar(task_name_entry, task_list_canvas, task_add_button, task_name_entry_ref):
+    top = Toplevel()
+    top.title("Välj Datum")
+    top.geometry("300x300")
+    top.configure(bg="#81B29A")
+
+    cal = Calendar(top, selectmode='day')
+    cal.pack(pady=20)
+
+    def select_date():
+        selected_date = cal.selection_get()
+        task_name = task_name_entry.get().strip()
+
+        if task_name:
+            task = manager.add_task(task_name)
+            wrapped = TaskWithStatus(task, selected_date.strftime("%Y-%m-%d"))
+            manager.tasks[-1] = wrapped
+            manager.save_tasks()
+            update_task_display(task_list_canvas, task_add_button, task_name_entry_ref)
+
+        task_name_entry.delete(0, END)
+        top.destroy()
+
+    select_btn = Button(top, text="Välj Datum", command=select_date, font=("Arial", 12, "bold"), bg="#F4F1DE", fg="#3D405B")
+    select_btn.pack(pady=10)
+
+def add_task(task_name_entry, task_list_canvas, task_add_button, task_name_entry_ref, due_date=None):
     task_name = task_name_entry.get().strip()
     if task_name:
         task = manager.add_task(task_name)
-        manager.tasks[-1] = TaskWithStatus(task)
+        manager.tasks[-1] = TaskWithStatus(task, due_date)
         update_task_display(task_list_canvas, task_add_button, task_name_entry_ref)
     task_name_entry.delete(0, END)
     task_name_entry.pack_forget()
@@ -48,6 +77,7 @@ def cancel_task_input(task_name_entry, task_add_button):
 
 def delete_task(index, task_list_canvas, task_add_button, task_name_entry):
     del manager.tasks[index]
+    manager.save_tasks()
     update_task_display(task_list_canvas, task_add_button, task_name_entry)
 
 def toggle_task_status(task_with_status, task_list_canvas, task_add_button, task_name_entry):
@@ -62,29 +92,31 @@ def update_task_display(canvas, task_input_button, task_name_entry):
     for index, task_with_status in enumerate(manager.tasks):
         task = task_with_status.task
         completed = task_with_status.completed
+        due_date = task_with_status.due_date
 
         bg_color = "#F4F1DE" if not completed else "#E0DED3"
 
-        canvas.create_round_rectangle(10, y, 480, y + 40, radius=5, fill=bg_color)
+        canvas.create_round_rectangle(10, y, 480, y + 50, radius=5, fill=bg_color)
 
         text_options = {"anchor": "w", "font": ("Arial", 12), "fill": "#3D405B"}
         if completed:
             text_options["font"] = ("Arial", 12, "overstrike")
 
-        canvas.create_text(30, y + 20, text=task.description, **text_options)
+        canvas.create_text(30, y + 15, text=task.description, **text_options)
 
-        # Checkbox for marking complete
+        if due_date:
+            canvas.create_text(30, y + 35, text=f"Due date: {due_date}", anchor="w", font=("Arial", 8), fill="#3D405B")
+
         var = BooleanVar(value=completed)
-        checkbox = Checkbutton(canvas, variable=var, bg="#E0DED3", activebackground="#E0DED3",
+        checkbox = Checkbutton(canvas, variable=var, bg=bg_color, activebackground=bg_color,
                                command=lambda t=task_with_status: toggle_task_status(t, canvas, task_input_button, task_name_entry))
-        canvas.create_window(420, y + 20, window=checkbox)
+        canvas.create_window(420, y + 25, window=checkbox)
 
-        # Delete button
         delete_button = Button(canvas, text="X", font=("Arial", 10, "bold"), fg="white", bg="#E07A5F",
                                command=lambda idx=index: delete_task(idx, canvas, task_input_button, task_name_entry))
-        canvas.create_window(460, y + 20, window=delete_button)
+        canvas.create_window(460, y + 25, window=delete_button)
 
-        y += 50
+        y += 60
 
     canvas.create_window(250, y + 25, window=task_input_button)
     canvas.create_window(250, y + 25, window=task_name_entry)
@@ -107,13 +139,12 @@ def run_gui():
     task_list_canvas = Canvas(canvas_frame, bg="#81B29A", highlightthickness=0)
     task_list_canvas.pack(fill="both", expand=True)
 
-    task_add_button = Button(window, text="Add Task", command=lambda: show_task_input(task_name_entry, task_add_button))
+    task_add_button = Button(window, text="Add Task", command=lambda: show_task_input(task_name_entry, task_list_canvas, task_add_button))
     task_add_button.config(font=("Arial", 12, "bold"), fg="#3D405B", bg="#F4F1DE")
-
-    task_name_entry.bind('<Return>', lambda event: add_task(task_name_entry, task_list_canvas, task_add_button, task_name_entry))
-    task_name_entry.bind('<Escape>', lambda event: cancel_task_input(task_name_entry, task_add_button))
 
     update_task_display(task_list_canvas, task_add_button, task_name_entry)
 
     window.mainloop()
 
+if __name__ == "__main__":
+    run_gui()
