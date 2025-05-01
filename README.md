@@ -12,7 +12,7 @@ This project is a simple, user-friendly Task Manager application built in Python
 6. Set timer for study session
 
 ### Possible Improvements
-1. Implement google calander support
+1. Implement calander
 2. Api implementation
 3. Streaks: Check if a daily tasks is completed to continue streak.
 4. Notifications
