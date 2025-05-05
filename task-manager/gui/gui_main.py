@@ -1,8 +1,8 @@
 from tkinter import *
-from tkcalendar import Calendar, DateEntry
+from tkcalendar import Calendar
 from datetime import datetime
 from tasks.task_manager import TaskManager
-from tasks.task_with_status import TaskWithStatus  # Ny fil du nämnde
+from tasks.task_with_status import TaskWithStatus
 
 manager = TaskManager()
 
@@ -39,6 +39,7 @@ def open_calendar(task_name_entry, task_list_canvas, task_add_button, task_name_
     top.title("Välj Datum")
     top.geometry("300x300")
     top.configure(bg="#81B29A")
+    top.resizable(False, False)
 
     cal = Calendar(top, selectmode='day')
     cal.pack(pady=20)
@@ -83,19 +84,51 @@ def delete_task(index, task_list_canvas, task_add_button, task_name_entry):
 def toggle_task_status(task_with_status, task_list_canvas, task_add_button, task_name_entry):
     task_with_status.completed = not task_with_status.completed
     manager.tasks.sort(key=lambda t: t.completed)
+    manager.save_tasks()
     update_task_display(task_list_canvas, task_add_button, task_name_entry)
+
+def edit_task(index, task_list_canvas, task_add_button, task_name_entry):
+    task_with_status = manager.tasks[index]
+    task = task_with_status.task
+
+    edit_window = Toplevel()
+    edit_window.title("Redigera Task")
+    edit_window.geometry("300x400")
+    edit_window.configure(bg="#81B29A")
+    edit_window.resizable(False, False)
+
+    Label(edit_window, text="Redigera beskrivning:", bg="#81B29A", fg="#3D405B", font=("Arial", 10, "bold")).pack(pady=10)
+    desc_entry = Entry(edit_window, width=30)
+    desc_entry.insert(0, task.description)
+    desc_entry.pack()
+
+    Label(edit_window, text="Välj nytt datum:", bg="#81B29A", fg="#3D405B", font=("Arial", 10, "bold")).pack(pady=10)
+    cal = Calendar(edit_window, selectmode='day')
+    cal.pack(pady=5)
+
+    def save_changes():
+        new_desc = desc_entry.get().strip()
+        new_date = cal.selection_get().strftime("%Y-%m-%d")
+
+        if new_desc:
+            task.description = new_desc
+            task_with_status.due_date = new_date
+            manager.save_tasks()
+            update_task_display(task_list_canvas, task_add_button, task_name_entry)
+            edit_window.destroy()
+
+    Button(edit_window, text="Spara", command=save_changes, bg="#F4F1DE", fg="#3D405B", font=("Arial", 10, "bold")).pack(pady=10)
 
 def update_task_display(canvas, task_input_button, task_name_entry):
     canvas.delete("all")
-
     y = 10
+
     for index, task_with_status in enumerate(manager.tasks):
         task = task_with_status.task
         completed = task_with_status.completed
         due_date = task_with_status.due_date
 
         bg_color = "#F4F1DE" if not completed else "#E0DED3"
-
         canvas.create_round_rectangle(10, y, 480, y + 50, radius=5, fill=bg_color)
 
         text_options = {"anchor": "w", "font": ("Arial", 12), "fill": "#3D405B"}
@@ -115,6 +148,10 @@ def update_task_display(canvas, task_input_button, task_name_entry):
         delete_button = Button(canvas, text="X", font=("Arial", 10, "bold"), fg="white", bg="#E07A5F",
                                command=lambda idx=index: delete_task(idx, canvas, task_input_button, task_name_entry))
         canvas.create_window(460, y + 25, window=delete_button)
+
+        edit_button = Button(canvas, text="Edit", font=("Arial", 9), bg="#F2CC8F", fg="#3D405B",
+                             command=lambda idx=index: edit_task(idx, canvas, task_input_button, task_name_entry))
+        canvas.create_window(390, y + 25, window=edit_button)
 
         y += 60
 
