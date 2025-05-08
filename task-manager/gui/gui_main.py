@@ -1,11 +1,78 @@
+import tkinter as tk
+from tkinter import messagebox
 from tkinter import *
 from tkcalendar import Calendar
 from datetime import datetime
 from tasks.task_manager import TaskManager
 from tasks.task_with_status import TaskWithStatus
+from tkinter import ttk
 
 manager = TaskManager()
 
+# Countdown Timer class for study timer
+class CountdownTimer:
+    def __init__(self, label, stop_btn, on_finish=None):
+        self.label = label
+        self.stop_btn = stop_btn  # Use stop_btn here
+        self.on_finish = on_finish
+        self.total_seconds = 0
+        self.remaining_seconds = 0
+        self._job = None
+        self.running = False
+        self.paused = False
+
+    def start(self, minutes=None):
+        if not self.running and not self.paused:
+            self.total_seconds = int(float(minutes) * 60)
+            self.remaining_seconds = self.total_seconds
+        self.running = True
+        self.paused = False
+        self._countdown()
+        self.stop_btn.config(text="Stop", command=self.stop)
+
+    def _countdown(self):
+        if self.remaining_seconds > 0 and self.running:
+            mins, secs = divmod(self.remaining_seconds, 60)
+            self.label.config(text=f"{mins:02d}:{secs:02d}")
+            self.remaining_seconds -= 1
+            self._job = self.label.after(1000, self._countdown)
+        else:
+            if self.remaining_seconds <= 0:
+                self.label.config(text="Time's up!")
+                if self.on_finish:
+                    self.on_finish()
+            self.running = False
+            self.paused = False
+            self.stop_btn.config(text="Stop", command=self.stop)
+
+    def stop(self):
+        if self._job:
+            self.label.after_cancel(self._job)
+            self._job = None
+        self.running = False
+        self.paused = True
+        self.stop_btn.config(text="Resume", command=self.resume)
+
+    def resume(self):
+        if self.paused:
+            self.running = True
+            self.paused = False
+            self._countdown()
+            self.stop_btn.config(text="Stop", command=self.stop)
+
+    def reset(self):
+        if self._job:
+            self.label.after_cancel(self._job)
+        self.label.config(text="00:00")
+        self._job = None
+        self.running = False
+        self.paused = False
+        self.remaining_seconds = 0
+        self.total_seconds = 0
+        self.stop_btn.config(text="Stop", command=self.stop)
+
+
+# UI components for Task Manager
 def _create_round_rectangle(self, x1, y1, x2, y2, radius=10, **kwargs):
     points = [
         x1 + radius, y1,
@@ -24,6 +91,7 @@ def _create_round_rectangle(self, x1, y1, x2, y2, radius=10, **kwargs):
 
 Canvas.create_round_rectangle = _create_round_rectangle
 
+
 def show_task_input(task_name_entry, task_list_canvas, task_add_button):
     task_name_entry.pack()
     task_add_button.pack_forget()
@@ -33,6 +101,7 @@ def show_task_input(task_name_entry, task_list_canvas, task_add_button):
 
     task_name_entry.bind("<Return>", open_calendar_after_input)
     task_name_entry.bind("<Escape>", lambda e: cancel_task_input(task_name_entry, task_add_button))
+
 
 def open_calendar(task_name_entry, task_list_canvas, task_add_button, task_name_entry_ref):
     top = Toplevel()
@@ -61,6 +130,7 @@ def open_calendar(task_name_entry, task_list_canvas, task_add_button, task_name_
     select_btn = Button(top, text="Välj Datum", command=select_date, font=("Arial", 12, "bold"), bg="#F4F1DE", fg="#3D405B")
     select_btn.pack(pady=10)
 
+
 def add_task(task_name_entry, task_list_canvas, task_add_button, task_name_entry_ref, due_date=None):
     task_name = task_name_entry.get().strip()
     if task_name:
@@ -71,15 +141,18 @@ def add_task(task_name_entry, task_list_canvas, task_add_button, task_name_entry
     task_name_entry.pack_forget()
     task_add_button.pack_forget()
 
+
 def cancel_task_input(task_name_entry, task_add_button):
     task_name_entry.delete(0, END)
     task_name_entry.pack_forget()
     task_add_button.pack_forget()
 
+
 def delete_task(index, task_list_canvas, task_add_button, task_name_entry):
     del manager.tasks[index]
     manager.save_tasks()
     update_task_display(task_list_canvas, task_add_button, task_name_entry)
+
 
 def toggle_task_status(task_with_status, task_list_canvas, task_add_button, task_name_entry):
     task_with_status.completed = not task_with_status.completed
@@ -158,10 +231,11 @@ def update_task_display(canvas, task_input_button, task_name_entry):
     canvas.create_window(250, y + 25, window=task_input_button)
     canvas.create_window(250, y + 25, window=task_name_entry)
 
+
 def run_gui():
     window = Tk()
     window.title("Task Manager")
-    window.geometry("500x600")
+    window.geometry("500x700")
     window.configure(bg="#81B29A")
     window.resizable(False, False)
 
@@ -181,7 +255,34 @@ def run_gui():
 
     update_task_display(task_list_canvas, task_add_button, task_name_entry)
 
+    # -------- STUDY SESSION TIMER --------
+    Label(window, text="Study Timer (minutes)", font=("Arial", 12, "bold"), bg="#81B29A", fg="#3D405B").pack(pady=5)
+
+    timer_frame = Frame(window, bg="#81B29A")
+    timer_frame.pack(pady=5)
+
+    duration_var = StringVar(value="25")
+    Entry(timer_frame, textvariable=duration_var, width=5, font=("Arial", 12)).grid(row=0, column=0, padx=5)
+
+    timer_label = Label(timer_frame, text="00:00", font=("Arial", 18, "bold"), bg="#81B29A", fg="#3D405B")
+    timer_label.grid(row=0, column=1, padx=10)
+
+    stop_btn = Button(timer_frame, text="Stop", bg="#F4F1DE", fg="#3D405B", font=("Arial", 10, "bold"))
+    stop_btn.grid(row=0, column=2, padx=5)
+
+    def timer_finished():
+        messagebox.showinfo("Study session complete", "Great job! Time's up!")
+
+    countdown_timer = CountdownTimer(label=timer_label, stop_btn=stop_btn, on_finish=timer_finished)
+
+    Button(timer_frame, text="Start", command=lambda: countdown_timer.start(duration_var.get()),
+           bg="#F4F1DE", fg="#3D405B", font=("Arial", 10, "bold")).grid(row=0, column=3, padx=5)
+
+    Button(timer_frame, text="Reset", command=countdown_timer.reset,
+           bg="#F4F1DE", fg="#3D405B", font=("Arial", 10, "bold")).grid(row=0, column=4, padx=5)
+
     window.mainloop()
+
 
 if __name__ == "__main__":
     run_gui()
