@@ -14,6 +14,7 @@ This project is a simple, user-friendly Task Manager application built in Python
 
 ### 🚀 How to Run
 Följ dessa steg för att köra projektet på din dator:
+
 **1. Klona denna repository**
 Öppna valfri terminal och skriv:
 `git clone git@github.com:axel-lindberg/Python-Task-Manager.git` (SSH)
