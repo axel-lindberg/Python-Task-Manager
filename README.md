@@ -30,8 +30,8 @@ python main.py
 Installation av Python kan behövas, vid behov, följ instruktionerna i terminalen.
 
 ### Possible Improvements
-1. Implement google calander support
-2. Api implementation
+1. Implementation of Google calender
+2. API implementation
 3. Streaks: Check if a daily tasks is completed to continue streak.
 4. Notifications
 
