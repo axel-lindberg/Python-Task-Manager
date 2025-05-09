@@ -23,9 +23,9 @@ eller `git clone https://github.com/axel-lindberg/Python-Task-Manager.git` (HTTP
 
 Skriv sedan:
 ```
-cd Python-Task-Manager //Navigera in i programmet
+cd Python-Task-Manager
 cd task-manager
-python main.py //Kör programmet
+python main.py
 ```
 Installation av Python kan behövas, vid behov, följ instruktionerna i terminalen.
 
