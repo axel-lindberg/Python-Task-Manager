@@ -12,12 +12,12 @@ This project is a simple, user-friendly Task Manager application built in Python
 6. Feedback on completion
 7. Countdown timer for study sessions
 
-### 🚀 How to Run
-Follow these steps to run the program on your computer:
-
 ### ⚙️ Technologies Used
 1. Python – Core programming language
 2. Tkinter – Standard Python GUI library for building the interface
+
+### 🚀 How to Run
+Follow these steps to run the program on your computer:
 
 **Clone this repository**
 
