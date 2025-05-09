@@ -9,11 +9,21 @@ from tkinter import ttk
 
 manager = TaskManager()
 
-# Countdown Timer class for study timer
+# -------------------- Countdown Timer Class -------------------- #
 class CountdownTimer:
+    """
+    A class to handle a Pomodoro-style countdown timer for study sessions.
+    """
+
     def __init__(self, label, stop_btn, on_finish=None):
+        """
+        Initializes the countdown timer.
+        :param label: The label widget used to display the countdown.
+        :param stop_btn: The button widget to toggle between Stop/Resume.
+        :param on_finish: Callback function triggered when the timer ends.
+        """
         self.label = label
-        self.stop_btn = stop_btn  # Use stop_btn here
+        self.stop_btn = stop_btn
         self.on_finish = on_finish
         self.total_seconds = 0
         self.remaining_seconds = 0
@@ -22,6 +32,10 @@ class CountdownTimer:
         self.paused = False
 
     def start(self, minutes=None):
+        """
+        Starts or resumes the countdown timer.
+        :param minutes: Duration of the timer in minutes.
+        """
         if not self.running and not self.paused:
             self.total_seconds = int(float(minutes) * 60)
             self.remaining_seconds = self.total_seconds
@@ -31,6 +45,7 @@ class CountdownTimer:
         self.stop_btn.config(text="Stop", command=self.stop)
 
     def _countdown(self):
+        """Private recursive method that updates the countdown every second."""
         if self.remaining_seconds > 0 and self.running:
             mins, secs = divmod(self.remaining_seconds, 60)
             self.label.config(text=f"{mins:02d}:{secs:02d}")
@@ -46,6 +61,7 @@ class CountdownTimer:
             self.stop_btn.config(text="Stop", command=self.stop)
 
     def stop(self):
+        """Pauses the countdown timer."""
         if self._job:
             self.label.after_cancel(self._job)
             self._job = None
@@ -54,6 +70,7 @@ class CountdownTimer:
         self.stop_btn.config(text="Resume", command=self.resume)
 
     def resume(self):
+        """Resumes the countdown timer from paused state."""
         if self.paused:
             self.running = True
             self.paused = False
@@ -61,6 +78,7 @@ class CountdownTimer:
             self.stop_btn.config(text="Stop", command=self.stop)
 
     def reset(self):
+        """Resets the timer to its initial state."""
         if self._job:
             self.label.after_cancel(self._job)
         self.label.config(text="00:00")
@@ -71,9 +89,13 @@ class CountdownTimer:
         self.total_seconds = 0
         self.stop_btn.config(text="Stop", command=self.stop)
 
+# -------------------- Task Manager GUI Functions -------------------- #
 
-# UI components for Task Manager
+# Extend Canvas to draw rounded rectangles
 def _create_round_rectangle(self, x1, y1, x2, y2, radius=10, **kwargs):
+    """
+    Draws a rounded rectangle on the canvas.
+    """
     points = [
         x1 + radius, y1,
         x2 - radius, y1,
@@ -91,8 +113,10 @@ def _create_round_rectangle(self, x1, y1, x2, y2, radius=10, **kwargs):
 
 Canvas.create_round_rectangle = _create_round_rectangle
 
-
 def show_task_input(task_name_entry, task_list_canvas, task_add_button):
+    """
+    Displays input field for entering a new task name.
+    """
     task_name_entry.pack()
     task_add_button.pack_forget()
 
@@ -104,6 +128,9 @@ def show_task_input(task_name_entry, task_list_canvas, task_add_button):
 
 
 def open_calendar(task_name_entry, task_list_canvas, task_add_button, task_name_entry_ref):
+    """
+    Opens a calendar pop-up to select a due date after entering a task.
+    """
     top = Toplevel()
     top.title("Välj Datum")
     top.geometry("300x300")
@@ -132,6 +159,9 @@ def open_calendar(task_name_entry, task_list_canvas, task_add_button, task_name_
 
 
 def add_task(task_name_entry, task_list_canvas, task_add_button, task_name_entry_ref, due_date=None):
+    """
+    Adds a new task with optional due date.
+    """
     task_name = task_name_entry.get().strip()
     if task_name:
         task = manager.add_task(task_name)
@@ -143,24 +173,36 @@ def add_task(task_name_entry, task_list_canvas, task_add_button, task_name_entry
 
 
 def cancel_task_input(task_name_entry, task_add_button):
+    """
+    Cancels the task input and hides the input field.
+    """
     task_name_entry.delete(0, END)
     task_name_entry.pack_forget()
     task_add_button.pack_forget()
 
 
 def delete_task(index, task_list_canvas, task_add_button, task_name_entry):
+    """
+    Deletes a task by index.
+    """
     del manager.tasks[index]
     manager.save_tasks()
     update_task_display(task_list_canvas, task_add_button, task_name_entry)
 
 
 def toggle_task_status(task_with_status, task_list_canvas, task_add_button, task_name_entry):
+    """
+    Marks a task as complete/incomplete and updates UI.
+    """
     task_with_status.completed = not task_with_status.completed
     manager.tasks.sort(key=lambda t: t.completed)
     manager.save_tasks()
     update_task_display(task_list_canvas, task_add_button, task_name_entry)
 
 def edit_task(index, task_list_canvas, task_add_button, task_name_entry):
+    """
+    Opens a pop-up window to edit a task's description and due date.
+    """
     task_with_status = manager.tasks[index]
     task = task_with_status.task
 
@@ -193,6 +235,9 @@ def edit_task(index, task_list_canvas, task_add_button, task_name_entry):
     Button(edit_window, text="Spara", command=save_changes, bg="#F4F1DE", fg="#3D405B", font=("Arial", 10, "bold")).pack(pady=10)
 
 def update_task_display(canvas, task_input_button, task_name_entry):
+    """
+    Refreshes the task list display with current tasks and their statuses.
+    """
     canvas.delete("all")
     y = 10
 
@@ -213,11 +258,13 @@ def update_task_display(canvas, task_input_button, task_name_entry):
         if due_date:
             canvas.create_text(30, y + 35, text=f"Due date: {due_date}", anchor="w", font=("Arial", 8), fill="#3D405B")
 
+        # Checkbox to toggle task complete
         var = BooleanVar(value=completed)
         checkbox = Checkbutton(canvas, variable=var, bg=bg_color, activebackground=bg_color,
                                command=lambda t=task_with_status: toggle_task_status(t, canvas, task_input_button, task_name_entry))
         canvas.create_window(420, y + 25, window=checkbox)
 
+        # Delete and Edit buttons
         delete_button = Button(canvas, text="X", font=("Arial", 10, "bold"), fg="white", bg="#E07A5F",
                                command=lambda idx=index: delete_task(idx, canvas, task_input_button, task_name_entry))
         canvas.create_window(460, y + 25, window=delete_button)
@@ -228,22 +275,30 @@ def update_task_display(canvas, task_input_button, task_name_entry):
 
         y += 60
 
+    # Add task entry/button at the end of the list
     canvas.create_window(250, y + 25, window=task_input_button)
     canvas.create_window(250, y + 25, window=task_name_entry)
 
 
+# -------------------- Main GUI Function -------------------- #
+
 def run_gui():
+    """
+    Main function to run the Task Manager GUI.
+    """
     window = Tk()
     window.title("Task Manager")
     window.geometry("500x700")
     window.configure(bg="#81B29A")
     window.resizable(False, False)
 
+    # Title
     title_label = Label(window, text="Your Task Manager", font=("Arial", 18, "bold"), fg="#3D405B", bg="#81B29A")
     title_label.pack(pady=10)
 
     task_name_entry = Entry(window, width=40)
 
+    # Task list area
     canvas_frame = Frame(window)
     canvas_frame.pack(pady=10, fill="both", expand=True)
 
@@ -255,7 +310,7 @@ def run_gui():
 
     update_task_display(task_list_canvas, task_add_button, task_name_entry)
 
-    # -------- STUDY SESSION TIMER --------
+    # ---------- Study Timer UI ---------- #
     Label(window, text="Study Timer (minutes)", font=("Arial", 12, "bold"), bg="#81B29A", fg="#3D405B").pack(pady=5)
 
     timer_frame = Frame(window, bg="#81B29A")
@@ -283,6 +338,6 @@ def run_gui():
 
     window.mainloop()
 
-
+# Run the application if this script is executed directly
 if __name__ == "__main__":
     run_gui()
