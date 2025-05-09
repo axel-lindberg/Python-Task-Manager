@@ -13,21 +13,21 @@ This project is a simple, user-friendly Task Manager application built in Python
 7. Countdown timer for study sessions
 
 ### 🚀 How to Run
-Följ dessa steg för att köra projektet på din dator:
+Follow these steps to run the program on your computer:
 
-**Klona denna repository**
+**Clone this repository**
 
-Öppna valfri terminal och skriv:
+Open terminal of your choice and write:
 `git clone git@github.com:axel-lindberg/Python-Task-Manager.git` (SSH)
-eller `git clone https://github.com/axel-lindberg/Python-Task-Manager.git` (HTTPS)
+or `git clone https://github.com/axel-lindberg/Python-Task-Manager.git` (HTTPS)
 
-Skriv sedan:
+Then write:
 ```
 cd Python-Task-Manager
 cd task-manager
 python main.py
 ```
-Installation av Python kan behövas, vid behov, följ instruktionerna i terminalen.
+Installation of Python might be needed, if needed, follow the instructions in your terminal.
 
 ### Possible Improvements
 1. Implementation of Google calender
