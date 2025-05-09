@@ -29,6 +29,7 @@ Then write:
 ```
 cd Python-Task-Manager
 cd task-manager
+pip tkcalendar
 python main.py
 ```
 Installation of Python might be needed, if needed, follow the instructions in your terminal.
