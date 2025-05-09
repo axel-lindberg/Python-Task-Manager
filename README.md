@@ -1,9 +1,9 @@
 # Task-Manager
 
-### Project Description
+### 📌 Project Description
 This project is a simple, user-friendly Task Manager application built in Python using Tkinter for the graphical user interface. The purpose of the application is to help users manage their daily tasks effectively by allowing them to add, edit, remove, and mark tasks as complete.
 
-### Features
+### ✅ Features
 1. Add tasks
 2. Remove tasks
 3. Add date to tasks
@@ -14,6 +14,10 @@ This project is a simple, user-friendly Task Manager application built in Python
 
 ### 🚀 How to Run
 Follow these steps to run the program on your computer:
+
+### ⚙️ Technologies Used
+1. Python – Core programming language
+2. Tkinter – Standard Python GUI library for building the interface
 
 **Clone this repository**
 
