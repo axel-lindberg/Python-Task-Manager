@@ -6,10 +6,11 @@ This project is a simple, user-friendly Task Manager application built in Python
 ### Features
 1. Add tasks
 2. Remove tasks
-3. Edit order of tasks
-4. Mark tasks as completed
-5. Feedback on completion
-6. Set timer for study session
+3. Add date to tasks
+4. Edit tasks
+5. Mark tasks as completed
+6. Feedback on completion
+7. Countdown timer for study sessions
 
 ### Possible Improvements
 1. Implement google calander support
